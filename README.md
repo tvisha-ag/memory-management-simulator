@@ -1,8 +1,7 @@
 # OS Memory Management Simulation & Fragmentation Analysis
 > **Empirical validation of memory allocation heuristics and the "Best Fit Paradox" in Operating Systems.**
 
-## 🌐 [Live Research Demo](https://tvisha-ag.github.io/memory-management-simulator/)
-*(Note: Replace the URL above with your actual GitHub Pages link after enabling it in Settings > Pages)*
+
 
 ## 1. Executive Summary
 This project is an experimental research tool designed to analyze the efficiency of **Contiguous Memory Allocation** strategies. By simulating 500+ operations on a 2048-byte address space, the study provides empirical evidence for the **"Best Fit Paradox"**—proving that the Best Fit algorithm, while theoretically precise, produces the highest rate of external fragmentation in high-load, mixed-workload environments.
