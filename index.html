@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Memory Management Simulator — OS Research</title>
+<style>
+:root{--bg:#0d1117;--bg2:#161b22;--bg3:#21262d;--border:#30363d;--text:#e6edf3;--muted:#8b949e;--blue:#3b82f6;--green:#10b981;--amber:#f59e0b;--red:#f87171;--mono:'Courier New',monospace;--sans:system-ui,-apple-system,sans-serif}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);font-size:14px;line-height:1.6}
+.header{background:var(--bg2);border-bottom:1px solid var(--border);padding:28px 48px 24px}
+.eyebrow{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.header h1{font-size:24px;font-weight:700;letter-spacing:-.02em;margin-bottom:6px;font-family:var(--mono)}
+.header-sub{font-family:var(--mono);font-size:11px;color:var(--muted)}
+.hstats{display:flex;gap:28px;margin-top:20px;padding-top:18px;border-top:1px solid var(--border);flex-wrap:wrap}
+.hstat-val{font-family:var(--mono);font-size:20px;font-weight:700}
+.hstat-lbl{font-family:var(--mono);font-size:10px;color:var(--muted);letter-spacing:.08em;margin-top:2px}
+.container{max-width:1200px;margin:0 auto;padding:32px 48px 60px}
+.section{margin-bottom:32px}
+.sec-title{font-family:var(--mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);margin-bottom:14px;display:flex;align-items:center;gap:12px}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--border)}
+.controls-panel{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:20px 24px;margin-bottom:24px}
+.ctrls{display:grid;grid-template-columns:repeat(4,1fr) auto;gap:16px;align-items:end}
+.cg{display:flex;flex-direction:column;gap:6px}
+.cl{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.cv{font-family:var(--mono);font-size:12px;color:var(--blue);margin-top:2px}
+input[type=range]{width:100%;accent-color:var(--blue);cursor:pointer}
+.run-btn{padding:10px 24px;background:var(--blue);color:white;border:none;border-radius:6px;font-family:var(--mono);font-size:13px;font-weight:700;cursor:pointer;letter-spacing:.04em;transition:background .15s;white-space:nowrap}
+.run-btn:hover{background:#2563eb}
+.algo-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px}
+.acard{background:var(--bg2);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.ahead{padding:12px 16px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.aname{font-family:var(--mono);font-size:13px;font-weight:700}
+.ef-badge{font-family:var(--mono);font-size:12px;font-weight:700;padding:3px 10px;border-radius:4px}
+.abody{padding:14px 16px}
+.mem-map{height:30px;border-radius:4px;overflow:hidden;display:flex;margin-bottom:12px;border:1px solid var(--border)}
+.mem-seg{height:100%;min-width:1px}
+.srows{display:flex;flex-direction:column;gap:5px}
+.srow{display:flex;justify-content:space-between;align-items:center;padding:4px 8px;background:var(--bg3);border-radius:4px;font-family:var(--mono);font-size:11px}
+.skey{color:var(--muted)}
+.chart-area{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:20px}
+.rtable-wrap{background:var(--bg2);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{background:var(--bg3);padding:10px 14px;text-align:left;font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);border-bottom:1px solid var(--border)}
+td{padding:10px 14px;font-family:var(--mono);border-bottom:1px solid var(--border)}
+tr:last-child td{border-bottom:none}
+.r-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.rcard{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:18px 20px}
+.rtag{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;padding:2px 8px;border-radius:3px;display:inline-block;margin-bottom:9px}
+.rcard h3{font-size:14px;font-weight:700;margin-bottom:8px}
+.rcard p,.rcard li{font-size:13px;color:var(--muted);line-height:1.7}
+.rcard ul{padding-left:18px;margin-top:6px}
+.codeblock{font-family:var(--mono);font-size:12px;background:var(--bg3);border:1px solid var(--border);border-left:3px solid var(--blue);padding:10px 14px;border-radius:4px;margin-top:10px;line-height:1.9;color:var(--text)}
+.cr{color:#86efac}.cw{color:#fca5a5}
+footer{background:var(--bg2);border-top:1px solid var(--border);padding:16px 48px;font-family:var(--mono);font-size:11px;color:var(--muted);display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px}
+@media(max-width:900px){.container{padding:20px}.header{padding:20px 24px}.algo-grid,.r-grid,.ctrls{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="eyebrow">Operating Systems Research · Memory Management Simulation</div>
+  <h1><span style="color:var(--blue)">First Fit</span> · <span style="color:var(--green)">Best Fit</span> · <span style="color:var(--amber)">Worst Fit</span></h1>
+  <div class="header-sub">Doubly-Linked List · External Fragmentation Analysis · Heavy Load Benchmark</div>
+  <div class="hstats">
+    <div><div class="hstat-val" id="h-mem">2048</div><div class="hstat-lbl">Memory (bytes)</div></div>
+    <div><div class="hstat-val" id="h-ops">500</div><div class="hstat-lbl">Operations</div></div>
+    <div><div class="hstat-val" id="h-winner" style="color:var(--amber)">—</div><div class="hstat-lbl">Lowest EF Algorithm</div></div>
+    <div><div class="hstat-val" id="h-best-ef">—</div><div class="hstat-lbl">Best EF Achieved</div></div>
+  </div>
+</div>
+<div class="container">
+  <div class="section">
+    <div class="sec-title">Simulation Parameters</div>
+    <div class="controls-panel">
+      <div class="ctrls">
+        <div class="cg"><span class="cl">Total Memory</span><input type="range" id="sl-mem" min="512" max="4096" step="256" value="2048"><span class="cv" id="lbl-mem">2048 bytes</span></div>
+        <div class="cg"><span class="cl">Operations</span><input type="range" id="sl-ops" min="100" max="1000" step="50" value="500"><span class="cv" id="lbl-ops">500 ops</span></div>
+        <div class="cg"><span class="cl">Max Request Size</span><input type="range" id="sl-max" min="20" max="400" step="10" value="200"><span class="cv" id="lbl-max">200 bytes</span></div>
+        <div class="cg"><span class="cl">Alloc Probability</span><input type="range" id="sl-prob" min="0.4" max="0.9" step="0.05" value="0.65"><span class="cv" id="lbl-prob">65%</span></div>
+        <button class="run-btn" onclick="runAll()">&#9654; Run</button>
+      </div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="sec-title">Live Memory Maps &amp; Metrics</div>
+    <div class="algo-grid">
+      <div class="acard"><div class="ahead"><span class="aname" style="color:var(--blue)">First Fit</span><span class="ef-badge" id="ef-ff" style="background:#1e3a5f;color:var(--blue)">EF: —</span></div><div class="abody"><div class="mem-map" id="map-ff"></div><div class="srows"><div class="srow"><span class="skey">Alloc success</span><span class="sval" id="sr-ff">—</span></div><div class="srow"><span class="skey">Alloc failures</span><span class="sval" id="fail-ff">—</span></div><div class="srow"><span class="skey">Free blocks</span><span class="sval" id="fb-ff">—</span></div><div class="srow"><span class="skey">Free memory</span><span class="sval" id="fm-ff">—</span></div></div></div></div>
+      <div class="acard"><div class="ahead"><span class="aname" style="color:var(--green)">Best Fit</span><span class="ef-badge" id="ef-bf" style="background:#052e16;color:var(--green)">EF: —</span></div><div class="abody"><div class="mem-map" id="map-bf"></div><div class="srows"><div class="srow"><span class="skey">Alloc success</span><span class="sval" id="sr-bf">—</span></div><div class="srow"><span class="skey">Alloc failures</span><span class="sval" id="fail-bf">—</span></div><div class="srow"><span class="skey">Free blocks</span><span class="sval" id="fb-bf">—</span></div><div class="srow"><span class="skey">Free memory</span><span class="sval" id="fm-bf">—</span></div></div></div></div>
+      <div class="acard"><div class="ahead"><span class="aname" style="color:var(--amber)">Worst Fit</span><span class="ef-badge" id="ef-wf" style="background:#2d1a00;color:var(--amber)">EF: —</span></div><div class="abody"><div class="mem-map" id="map-wf"></div><div class="srows"><div class="srow"><span class="skey">Alloc success</span><span class="sval" id="sr-wf">—</span></div><div class="srow"><span class="skey">Alloc failures</span><span class="sval" id="fail-wf">—</span></div><div class="srow"><span class="skey">Free blocks</span><span class="sval" id="fb-wf">—</span></div><div class="srow"><span class="skey">Free memory</span><span class="sval" id="fm-wf">—</span></div></div></div></div>
+    </div>
+  </div>
+  <div class="section">
+    <div class="sec-title">External Fragmentation Over Time</div>
+    <div class="chart-area"><canvas id="ef-chart" height="280"></canvas></div>
+  </div>
+  <div class="section">
+    <div class="sec-title">Comparison Summary</div>
+    <div class="rtable-wrap"><table><thead><tr><th>Algorithm</th><th>Time Complexity</th><th>Final EF %</th><th>Free Blocks</th><th>Alloc Success</th><th>Failures</th><th>Rank</th></tr></thead><tbody id="summary-tbody"><tr><td colspan="7" style="text-align:center;color:var(--muted);padding:24px">Run simulation to see results</td></tr></tbody></table></div>
+  </div>
+  <div class="section">
+    <div class="sec-title">Research Framework</div>
+    <div class="r-grid">
+      <div class="rcard"><span class="rtag" style="background:#1e3a5f;color:var(--blue)">Formula</span><h3>External Fragmentation</h3><p>Silberschatz, Galvin &amp; Gagne (OS Concepts, 10th ed.):</p><div class="codeblock">EF = 1 - (largest_free_hole / total_free_memory)<br><br>EF = 0.0  all free memory is contiguous  <span class="cr">ideal</span><br>EF = 1.0  all free is 1-byte fragments   <span class="cw">worst</span></div></div>
+      <div class="rcard"><span class="rtag" style="background:#052e16;color:var(--green)">Finding</span><h3>Why Best Fit Underperforms</h3><p>Best Fit minimises wasted space per allocation but creates many tiny leftover fragments too small for any future request. This causes higher long-term external fragmentation despite optimal per-allocation decisions. A classic example of a locally-optimal greedy strategy failing globally — a key OS exam insight.</p></div>
+      <div class="rcard"><span class="rtag" style="background:#2d1a00;color:var(--amber)">Data Structure</span><h3>Doubly-Linked List</h3><p>Each block stores: <code style="font-family:monospace;font-size:11px;background:var(--bg3);padding:1px 4px">start, size, free, pid, prev*, next*</code></p><ul><li>Allocation: O(n) scan for suitable hole</li><li>Deallocation: O(n) scan + O(1) coalesce</li><li>Coalescing merges adjacent free blocks to prevent artificial fragmentation</li><li>Heap variant: Best Fit can use min-heap for O(log n)</li></ul></div>
+      <div class="rcard"><span class="rtag" style="background:#1a0505;color:var(--red)">OS Reality</span><h3>Real OS Memory Managers</h3><p>Linux uses the buddy system + slab allocator. glibc malloc() uses a variant of First Fit with size-class bins. The key insight: speed (O(1) amortised) matters more than minimal fragmentation in a real kernel. This simulator proves why the theoretical "best" algorithm — Best Fit — is almost never used in production operating systems.</p></div>
+    </div>
+  </div>
+</div>
+<footer>
+  <span>Memory Management Simulator · Python · Doubly-Linked List · External Fragmentation Analysis</span>
+  <span>Silberschatz et al. (2018) · Knuth Vol.1 §2.5 · Linux Slab Allocator</span>
+</footer>
+<script>
+class Block{constructor(s,z,f=true,p=null){this.start=s;this.size=z;this.free=f;this.pid=p;this.prev=null;this.next=null}get end(){return this.start+this.size-1}}
+class MM{constructor(t){this.total=t;this.allocCount=0;this.failCount=0;this.efH=[];this.head=new Block(0,t,true)}
+allocate(sz,pid){const h=this._find(sz);if(!h){this.failCount++;return false}this._split(h,sz,pid);this.allocCount++;return true}
+free(pid){let b=this.head;while(b){if(!b.free&&b.pid===pid){b.free=true;b.pid=null;this._coalesce(b);return true}b=b.next}return false}
+_find(sz){throw 0}
+_split(bl,sz,pid){const lft=bl.size-sz;bl.size=sz;bl.free=false;bl.pid=pid;if(lft>0){const nb=new Block(bl.start+sz,lft,true);nb.prev=bl;nb.next=bl.next;if(bl.next)bl.next.prev=nb;bl.next=nb}}
+_coalesce(b){if(b.next&&b.next.free){b.size+=b.next.size;b.next=b.next.next;if(b.next)b.next.prev=b}if(b.prev&&b.prev.free){b.prev.size+=b.size;b.prev.next=b.next;if(b.next)b.next.prev=b.prev}}
+ef(){let fr=[],b=this.head;while(b){if(b.free)fr.push(b.size);b=b.next}if(!fr.length)return 0;const t=fr.reduce((a,v)=>a+v,0),mx=Math.max(...fr);return t?1-mx/t:0}
+totalFree(){let t=0,b=this.head;while(b){if(b.free)t+=b.size;b=b.next}return t}
+fbc(){let c=0,b=this.head;while(b){if(b.free)c++;b=b.next}return c}
+snap(){const o=[];let b=this.head;while(b){o.push({start:b.start,size:b.size,free:b.free,pid:b.pid});b=b.next}return o}
+rec(){this.efH.push(this.ef())}}
+class FF extends MM{_find(sz){let b=this.head;while(b){if(b.free&&b.size>=sz)return b;b=b.next}return null}}
+class BF extends MM{_find(sz){let best=null,b=this.head;while(b){if(b.free&&b.size>=sz&&(!best||b.size<best.size))best=b;b=b.next}return best}}
+class WF extends MM{_find(sz){let worst=null,b=this.head;while(b){if(b.free&&b.size>=sz&&(!worst||b.size>worst.size))worst=b;b=b.next}return worst}}
+function rng(seed){let s=seed;return()=>{s=(s*1664525+1013904223)&0xffffffff;return(s>>>0)/0xffffffff}}
+function sim(Cls,tot,nops,mn,mx,ap){const r=rng(42),mgr=new Cls(tot),live=[];let pid=1;
+for(let i=0;i<nops;i++){if(live.length>0&&r()>ap){const idx=Math.floor(r()*live.length),p=live[idx];if(mgr.free(p))live.splice(idx,1)}else{const sz=Math.floor(r()*(mx-mn+1))+mn;if(mgr.allocate(sz,pid))live.push(pid);pid++}mgr.rec()}
+return{efH:mgr.efH,ac:mgr.allocCount,fc:mgr.failCount,ef:mgr.ef(),fb:mgr.fbc(),tf:mgr.totalFree(),map:mgr.snap()}}
+const ALGOS=[{name:'First Fit',cls:FF,color:'#3b82f6',id:'ff'},{name:'Best Fit',cls:BF,color:'#10b981',id:'bf'},{name:'Worst Fit',cls:WF,color:'#f59e0b',id:'wf'}];
+function renderMap(id,map,color,tot){const el=document.getElementById('map-'+id);el.innerHTML='';for(const b of map){const s=document.createElement('div');s.className='mem-seg';s.style.width=(b.size/tot*100)+'%';s.style.background=b.free?'#21262d':color;el.appendChild(s)}}
+function renderCard(id,r,color,tot){const sr=(r.ac/Math.max(r.ac+r.fc,1)*100).toFixed(1);const ef=(r.ef*100).toFixed(1);document.getElementById('ef-'+id).textContent='EF: '+ef+'%';document.getElementById('sr-'+id).textContent=sr+'%';document.getElementById('fail-'+id).textContent=r.fc;document.getElementById('fb-'+id).textContent=r.fb;document.getElementById('fm-'+id).textContent=r.tf+' bytes';renderMap(id,r.map,color,tot)}
+function renderChart(results,nops){const cv=document.getElementById('ef-chart');const ctx=cv.getContext('2d');const W=cv.offsetWidth||1100,H=280;const dpr=window.devicePixelRatio||1;cv.width=W*dpr;cv.height=H*dpr;cv.style.height=H+'px';ctx.scale(dpr,dpr);ctx.fillStyle='#161b22';ctx.fillRect(0,0,W,H);const pad={t:20,r:20,b:36,l:52};const pw=W-pad.l-pad.r,ph=H-pad.t-pad.b;ctx.strokeStyle='#21262d';ctx.lineWidth=.8;for(let i=0;i<=5;i++){const y=pad.t+ph*(1-i/5);ctx.beginPath();ctx.moveTo(pad.l,y);ctx.lineTo(pad.l+pw,y);ctx.stroke();ctx.fillStyle='#8b949e';ctx.font='10px monospace';ctx.fillText(i*20+'%',4,y+4)}ctx.strokeStyle='#30363d';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(pad.l,pad.t);ctx.lineTo(pad.l,pad.t+ph);ctx.lineTo(pad.l+pw,pad.t+ph);ctx.stroke();ctx.fillStyle='#8b949e';ctx.font='10px monospace';for(let i=0;i<=4;i++){const x=pad.l+pw*i/4;ctx.fillText(Math.round(nops*i/4),x-8,pad.t+ph+16)}results.forEach(({efH,color})=>{const step=pw/(efH.length-1);ctx.strokeStyle=color;ctx.lineWidth=2;ctx.beginPath();efH.forEach((v,i)=>{const x=pad.l+i*step,y=pad.t+ph*(1-v);i===0?ctx.moveTo(x,y):ctx.lineTo(x,y)});ctx.stroke()});let lx=pad.l+16;results.forEach(({name,color})=>{ctx.fillStyle=color;ctx.fillRect(lx,pad.t+8,20,3);ctx.fillStyle='#e6edf3';ctx.font='11px monospace';ctx.fillText(name,lx+26,pad.t+13);lx+=ctx.measureText(name).width+56})}
+function renderTable(results){const ranked=[...results].sort((a,b)=>a.r.ef-b.r.ef);document.getElementById('summary-tbody').innerHTML=ranked.map((r,i)=>{const sr=(r.r.ac/Math.max(r.r.ac+r.r.fc,1)*100).toFixed(1);const ef=(r.r.ef*100).toFixed(2);const rk=['#1 best','#2','#3'][i];return`<tr><td style="color:${r.color};font-weight:700">${r.name}</td><td>O(n)</td><td style="color:${i===0?'#10b981':'#e6edf3'};font-weight:${i===0?700:400}">${ef}%</td><td>${r.r.fb}</td><td>${sr}%</td><td>${r.r.fc}</td><td style="color:${i===0?'#10b981':'#8b949e'}">${rk}</td></tr>`}).join('')}
+function runAll(){const tot=+document.getElementById('sl-mem').value,nops=+document.getElementById('sl-ops').value,mx=+document.getElementById('sl-max').value,ap=+document.getElementById('sl-prob').value;document.getElementById('h-mem').textContent=tot;document.getElementById('h-ops').textContent=nops;const all=ALGOS.map(a=>({name:a.name,color:a.color,id:a.id,r:sim(a.cls,tot,nops,10,mx,ap)}));all.forEach(r=>renderCard(r.id,r.r,r.color,tot));renderChart(all.map(r=>({efH:r.r.efH,color:r.color,name:r.name})),nops);renderTable(all);const best=[...all].sort((a,b)=>a.r.ef-b.r.ef)[0];document.getElementById('h-winner').textContent=best.name;document.getElementById('h-winner').style.color=best.color;document.getElementById('h-best-ef').textContent=(best.r.ef*100).toFixed(1)+'%'}
+['mem','ops','max','prob'].forEach(k=>{document.getElementById('sl-'+k).addEventListener('input',e=>{const v=+e.target.value;document.getElementById('lbl-'+k).textContent=k==='prob'?Math.round(v*100)+'%':v+(k==='ops'?' ops':' bytes')})});
+window.addEventListener('load',runAll);
+</script>
+</body>
+</html>
