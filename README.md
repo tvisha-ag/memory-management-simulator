@@ -1,7 +1,7 @@
 # OS Memory Management Simulation & Fragmentation Analysis
 > **Empirical validation of memory allocation heuristics and the "Best Fit Paradox" in Operating Systems.**
 
-#Live demo link
+## Live demo link
 https://tvisha-ag.github.io/memory-management-simulator/
 
 ## 1. Executive Summary
@@ -46,6 +46,8 @@ The simulator uses a custom **Doubly-Linked List** architecture to model the hea
     python memory_simulator.py
     ```
     This will run the 500-operation benchmark and output the `memory_simulator.png` analytics chart.
+
+    
 
 ## 6. Academic Context
 This research project serves as a practical implementation of concepts discussed in **Silberschatz’s Operating System Concepts (Chapter 9)**, providing a data-driven perspective on memory management trade-offs and heap stability.
