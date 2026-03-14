@@ -49,5 +49,3 @@ The simulator uses a custom **Doubly-Linked List** architecture to model the hea
 ## 6. Academic Context
 This research project serves as a practical implementation of concepts discussed in **Silberschatz’s Operating System Concepts (Chapter 9)**, providing a data-driven perspective on memory management trade-offs and heap stability.
 
----
-*Created as part of a Research Portfolio for the IIT Hyderabad SURE Internship application.*
